@@ -12,9 +12,9 @@ import androidx.appcompat.widget.AppCompatCheckBox
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.fragment.app.Fragment
 
+private val  TAG  = "TAG" + CrimeFragment::class.java.simpleName
 
 class CrimeFragment : Fragment() {
-    private val  TAG  = "TAG" + CrimeFragment::class.java.simpleName
 
     private lateinit var crime: Crime
     private lateinit var titleField: AppCompatEditText
