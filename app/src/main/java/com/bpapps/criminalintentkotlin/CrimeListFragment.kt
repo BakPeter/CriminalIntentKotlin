@@ -1,11 +1,11 @@
 package com.bpapps.criminalintentkotlin
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.fragment.app.Fragment
@@ -13,10 +13,22 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.util.*
 
 private const val TAG = "TAG.CrimeListFragment"
 
 class CrimeListFragment : Fragment() {
+
+    /**
+     * Required interface for hosting activities
+     */
+    interface Callbacks {
+        fun onCrimeSelected(crimeId: UUID)
+    }
+
+    private var callbacks: Callbacks? = null
+
+
     //    private val crimeListViewModel: CrimeListViewModel by lazy {
 //        ViewModelProviders.of(this).get(CrimeListViewModel::class.java)
 //    }
@@ -34,6 +46,11 @@ class CrimeListFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         crimeListViewModel = ViewModelProvider(this).get(CrimeListViewModel::class.java)
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        callbacks = context as Callbacks?
     }
 
     override fun onCreateView(
@@ -57,7 +74,7 @@ class CrimeListFragment : Fragment() {
             viewLifecycleOwner,
             Observer { crimes ->
                 crimes?.let {
-                    Log.d(TAG, "Got crimes ${crimes.size}")
+                   // Log.d(TAG, "Got crimes ${crimes.size}")
                     updateUI(crimes)
                 }
 
@@ -65,6 +82,11 @@ class CrimeListFragment : Fragment() {
         )
 
         lifecycle.currentState
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        callbacks = null
     }
 
     private fun updateUI(crimes: List<Crime>) {
@@ -95,7 +117,8 @@ class CrimeListFragment : Fragment() {
         }
 
         override fun onClick(v: View?) {
-            Toast.makeText(context, "${crime.title} pressed", Toast.LENGTH_SHORT).show()
+//            Toast.makeText(context, "${crime.title} pressed", Toast.LENGTH_SHORT).show()
+            callbacks?.onCrimeSelected(this.crime.id)
         }
     }
 

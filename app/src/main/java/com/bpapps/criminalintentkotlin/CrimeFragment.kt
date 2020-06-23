@@ -11,8 +11,12 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatCheckBox
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import java.util.*
 
-private val  TAG  = "TAG" + CrimeFragment::class.java.simpleName
+private const val TAG = "TAG.CrimeFragment"
+private const val ARGS_CRIME_ID = "crime_id"
 
 class CrimeFragment : Fragment() {
 
@@ -21,9 +25,16 @@ class CrimeFragment : Fragment() {
     private lateinit var dateButton: AppCompatButton
     private lateinit var solvedCheckBox: AppCompatCheckBox
 
+    private val crimeDetailViewModel: CrimeDetailViewModel by lazy {
+        ViewModelProviders.of(this).get(CrimeDetailViewModel::class.java)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         crime = Crime()
+
+        val crimeId: UUID = arguments?.getSerializable(ARGS_CRIME_ID) as UUID
+        crimeDetailViewModel.loadCrime(crimeId)
     }
 
     override fun onCreateView(
@@ -45,6 +56,19 @@ class CrimeFragment : Fragment() {
         return view
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        crimeDetailViewModel.crimeLiveData.observe(
+            viewLifecycleOwner,
+            Observer { crime ->
+                crime?.let {
+                    this.crime = crime
+                    updateUI()
+                }
+            }
+        )
+    }
+
     override fun onStart() {
         super.onStart()
         titleField.addTextChangedListener(object : TextWatcher {
@@ -64,6 +88,33 @@ class CrimeFragment : Fragment() {
             setOnCheckedChangeListener { _, isChecked ->
                 crime.isSolved = isChecked
                 Log.d(TAG, crime.toString())
+            }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        crimeDetailViewModel.saveCrime(crime)
+    }
+
+    private fun updateUI() {
+        titleField.setText(crime.title)
+        dateButton.text = crime.date.toString()
+//        solvedCheckBox.isChecked = crime.isSolved
+        solvedCheckBox.apply {
+            isChecked = crime.isSolved
+            jumpDrawablesToCurrentState()
+        }
+    }
+
+    companion object {
+        fun newInstance(crimeId: UUID): CrimeFragment {
+            val args = Bundle().apply {
+                putSerializable(ARGS_CRIME_ID, crimeId)
+            }
+
+            return CrimeFragment().apply {
+                arguments = args
             }
         }
     }
