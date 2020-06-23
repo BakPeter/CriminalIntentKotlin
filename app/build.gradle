@@ -24,6 +24,12 @@ android {
         }
     }
 
+    kapt {
+        arguments {
+            arg("room.schemaLocation", "D:\\AndroidProjects\\TheBigNerdRanchGuidApps\\CriminalIntentKotlin")
+        }
+    }
+
 }
 
 dependencies {
