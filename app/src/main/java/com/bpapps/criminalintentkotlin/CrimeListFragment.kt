@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -53,6 +54,8 @@ class CrimeListFragment : Fragment() {
         crimeRecyclerView.adapter = adapter
     }
 
+    //=================================================================================
+//=================================================================================
     private inner class CrimeHolder(view: View) : RecyclerView.ViewHolder(view),
         View.OnClickListener {
 
@@ -60,6 +63,7 @@ class CrimeListFragment : Fragment() {
 
         private val titleTextView: AppCompatTextView = itemView.findViewById(R.id.crime_title)
         private val dateTextView: AppCompatTextView = itemView.findViewById(R.id.crime_date)
+        private val solvedImageView: AppCompatImageView = itemView.findViewById(R.id.crime_solved)
 
         init {
             itemView.setOnClickListener(this)
@@ -69,6 +73,7 @@ class CrimeListFragment : Fragment() {
             this.crime = crime
             this.titleTextView.text = this.crime.title
             this.dateTextView.text = this.crime.date.toString()
+            solvedImageView.visibility = if(crime.isSolved) View.VISIBLE else View.GONE
         }
 
         override fun onClick(v: View?) {
