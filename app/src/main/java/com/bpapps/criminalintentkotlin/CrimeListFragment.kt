@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,9 +17,13 @@ import androidx.recyclerview.widget.RecyclerView
 private const val TAG = "TAG.CrimeListFragment"
 
 class CrimeListFragment : Fragment() {
+    //    private val crimeListViewModel: CrimeListViewModel by lazy {
+//        ViewModelProviders.of(this).get(CrimeListViewModel::class.java)
+//    }
     private lateinit var crimeListViewModel: CrimeListViewModel
+
     private lateinit var crimeRecyclerView: RecyclerView
-    private var adapter: CrimeAdapter? = null
+    private var adapter: CrimeAdapter? = CrimeAdapter(emptyList())
 
     companion object {
         fun newInstance(): CrimeListFragment {
@@ -28,10 +33,7 @@ class CrimeListFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         crimeListViewModel = ViewModelProvider(this).get(CrimeListViewModel::class.java)
-
-        Log.d(TAG, "Total crimes: ${crimeListViewModel.crimes.size}  ")
     }
 
     override fun onCreateView(
@@ -43,13 +45,29 @@ class CrimeListFragment : Fragment() {
 
         crimeRecyclerView = view.findViewById(R.id.crime_recycler_view)
         crimeRecyclerView.layoutManager = LinearLayoutManager(context)
+        crimeRecyclerView.adapter = adapter
 
-        updateUI()
         return view
     }
 
-    private fun updateUI() {
-        val crimes = crimeListViewModel.crimes
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        crimeListViewModel.crimeListLiveData.observe(
+            viewLifecycleOwner,
+            Observer { crimes ->
+                crimes?.let {
+                    Log.d(TAG, "Got crimes ${crimes.size}")
+                    updateUI(crimes)
+                }
+
+            }
+        )
+
+        lifecycle.currentState
+    }
+
+    private fun updateUI(crimes: List<Crime>) {
         adapter = CrimeAdapter(crimes)
         crimeRecyclerView.adapter = adapter
     }
@@ -73,7 +91,7 @@ class CrimeListFragment : Fragment() {
             this.crime = crime
             this.titleTextView.text = this.crime.title
             this.dateTextView.text = this.crime.date.toString()
-            solvedImageView.visibility = if(crime.isSolved) View.VISIBLE else View.GONE
+            solvedImageView.visibility = if (crime.isSolved) View.VISIBLE else View.GONE
         }
 
         override fun onClick(v: View?) {
@@ -97,16 +115,4 @@ class CrimeListFragment : Fragment() {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
