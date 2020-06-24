@@ -2,15 +2,12 @@ package com.bpapps.criminalintentkotlin
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.util.*
@@ -28,11 +25,9 @@ class CrimeListFragment : Fragment() {
 
     private var callbacks: Callbacks? = null
 
-
-    //    private val crimeListViewModel: CrimeListViewModel by lazy {
-//        ViewModelProviders.of(this).get(CrimeListViewModel::class.java)
-//    }
-    private lateinit var crimeListViewModel: CrimeListViewModel
+    private val crimeListViewModel: CrimeListViewModel by lazy {
+        ViewModelProviders.of(this).get(CrimeListViewModel::class.java)
+    }
 
     private lateinit var crimeRecyclerView: RecyclerView
     private var adapter: CrimeAdapter? = CrimeAdapter(emptyList())
@@ -45,7 +40,7 @@ class CrimeListFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        crimeListViewModel = ViewModelProvider(this).get(CrimeListViewModel::class.java)
+        setHasOptionsMenu(true)
     }
 
     override fun onAttach(context: Context) {
@@ -74,7 +69,7 @@ class CrimeListFragment : Fragment() {
             viewLifecycleOwner,
             Observer { crimes ->
                 crimes?.let {
-                   // Log.d(TAG, "Got crimes ${crimes.size}")
+                    // Log.d(TAG, "Got crimes ${crimes.size}")
                     updateUI(crimes)
                 }
 
@@ -89,9 +84,26 @@ class CrimeListFragment : Fragment() {
         callbacks = null
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_crime_list, menu)
+    }
+
     private fun updateUI(crimes: List<Crime>) {
         adapter = CrimeAdapter(crimes)
         crimeRecyclerView.adapter = adapter
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.new_crime -> {
+                val crime = Crime()
+                crimeListViewModel.addCrime(crime)
+                callbacks?.onCrimeSelected(crime.id)
+                return true
+            }
+            else -> return super.onOptionsItemSelected(item)
+        }
     }
 
     //=================================================================================
