@@ -9,10 +9,11 @@ data class Crime(
     @PrimaryKey val id: UUID = UUID.randomUUID(),
     var title: String = "",
     var date: Date = Date(),
-    var isSolved: Boolean = false
+    var isSolved: Boolean = false,
+    var suspect: String = ""
 ) {
 
     override fun toString(): String {
-        return "Crime(id=$id, title='$title', date=$date, isSolved=$isSolved)"
+        return "Crime(id=$id, title='$title', date=$date, isSolved=$isSolved, suspect='$suspect')"
     }
 }
